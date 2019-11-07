@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- scan:当此属性设置为true时，配置文件如果发生改变，将会被重新加载，默认值为true。 -->
+<!-- scanPeriod:设置监测配置文件是否有修改的时间间隔，如果没有给出时间单位，默认单位是毫秒。当scan为true时，此属性生效。
+默认的时间间隔为1分钟。 -->
+<!-- debug:当此属性设置为true时，将打印出logback内部日志信息，实时查看logback运行状态。默认值为false。 -->
+<!-- magenta:洋红 -->
+<!-- boldMagenta:粗红-->
+<!-- cyan:青色 -->
+<!-- white:白色 -->
+<!-- magenta:洋红 -->
+<configuration  scan="true" scanPeriod="60 seconds" debug="false">
+    <contextName>logback</contextName>
+    <!-- 设置变量<property> -->
+    <!--  用来定义变量值的标签， 有两个属性，name和value；其中name的值是变量的名称，value的值时变量定义的值。
+    通过定义的值会被插入到logger上下文中。定义变量后，可以使“${}”来使用变量。  -->
+    <!-- 日志颜色 蓝绿 -->
+    <!--<property name="CONSOLE_LOG_PATTERN"
+              value="%yellow(%date{yyyy-MM-dd HH:mm:ss}) |%highlight(%-5level) |%blue(%thread) |%blue(%file:%line) |%green(%logger) |%cyan(%msg%n)"/>-->
+    <!-- 日志颜色 红 紫 蓝 -->
+    <property name="CONSOLE_LOG_PATTERN"
+                value="%red(%date{yyyy-MM-dd HH:mm:ss}) %highlight(%-5level) %red([%thread]) %boldMagenta(%logger{50}) %cyan(%msg%n)"/>
+
+    <property name="log.path" value="D:/log" />
+    <!-- appender用来格式化日志输出节点，有俩个属性name和class，class用来指定哪种输出策略，常用就是控制台输出策略和文件输出策略。 -->
+    <!--输出到控制台-->
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- ThresholdFilter为系统定义的拦截器，例如我们用ThresholdFilter来过滤掉ERROR级别以下的日志不输出到文件中。
+        如果不用记得注释掉，不然你控制台会发现没日志~ -->
+        <!-- <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+             <level>ERROR</level>
+         </filter>-->
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+<!--            <pattern>%d{HH:mm:ss.SSS} %contextName [%thread] %-5level %logger{36} - %msg%n</pattern>-->
+        </encoder>
+    </appender>
+
+    <!--输出到文件-->
+    <!-- RollingFileAppender用于切分文件日志 -->
+    <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- 定义了日志的切分方式——把每一天的日志归档到一个文件中, 如果你想把日志直接放到当前项目下，把${log.path}/去掉即可。 -->
+            <fileNamePattern>${log.path}/logback.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <!-- 表示只保留最近30天的日志，以防止日志填满整个磁盘空间 -->
+            <maxHistory>30</maxHistory>
+            <!-- 用来指定日志文件的上限大小，例如设置为1GB的话，那么到了这个值，就会删除旧的日志。 -->
+            <totalSizeCap>256MB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+<!--            <pattern>%d{HH:mm:ss.SSS} %contextName [%thread] %-5level %logger{36} - %msg%n</pattern>-->
+        </encoder>
+    </appender>
+
+    <!-- root节点是必选节点，用来指定最基础的日志输出级别，只有一个level属性。 -->
+    <!-- level:用来设置打印级别，大小写无关：TRACE, DEBUG, INFO, WARN, ERROR, ALL 和 OFF，不能设置为INHERITED或者同义词NULL。默认是DEBUG。
+        可以包含零个或多个元素，标识这个appender将会添加到这个logger。 -->
+    <root level="info">
+        <appender-ref ref="console" />
+        <appender-ref ref="file" />
+    </root>
+
+    <!-- logback为java中的包 -->
+    <logger name="cn.woconnect.pingtest.utils"/>
+    <!--logback.LogbackDemo：类的全路径 -->
+<!--    <logger name="cn.woconnect.pingtest.utils" level="WARN" additivity="false">-->
+<!--        <appender-ref ref="console"/>-->
+<!--    </logger>-->
+
+    <!-- 测试环境+开发环境. 多个使用逗号隔开. -->
+    <!--可以启动服务的时候指定 profile （如不指定使用默认），如指定prod 的方式为：
+        java -jar xxx.jar -spring.profiles.active=prod-->
+    <springProfile name="test,dev">
+        <logger name="cn.woconnect.pingtest.utils" level="info" />
+    </springProfile>
+    <!-- 生产环境. -->
+    <springProfile name="prod">
+        <logger name="cn.woconnect.pingtest.utils" level="ERROR" />
+    </springProfile>
+</configuration>
